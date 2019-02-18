@@ -1,0 +1,681 @@
+---
+title: "Code Portfolio"
+author: "Piyush Chandra"
+date: "12/1/2018"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Week 5 - Exercise 11.2.2
+
+####Function would you use to read a file where fields were separated with “|”?
+
+```{r}
+#read_delim()
+```
+
+####Apart from file, skip, and comment, what other arguments do read_csv() and read_tsv() have in common?
+
+```{r}
+#col_names and col_types are used to specify the column names and how to parse the columns locale is important for determining things like the encoding and whether "." or "," is used as a decimal mark.
+#na and quoted_na control which strings are treated as missing values when parsing vectors
+#trim_ws trims whitespace before and after cells before parsing
+#n_max sets how many rows to read
+#guess_max sets how many rows to use when guessing the column type
+#progress determines whether a progress bar is shown
+```
+
+####What are the most important arguments to `read_fwf()`?
+
+```{r}
+#It is col_positions which tells the function where data columns begin and end
+```
+
+####Sometimes strings in a CSV file contain commas. To prevent them from causing problems they need to be surrounded by a quoting character, like " or '. By convention, read_csv() assumes that the quoting character will be ", and if you want to change it you’ll need to use read_delim() instead. What arguments do you need to specify to read the following text into a data frame? - "x,y\n1,'a,b'"
+  
+```{r}
+#We will specify a delimiter, in this case ",", and a quote argument read_delim(x, ",", quote = "'")
+```
+
+####Identify what is wrong with each of the following inline CSV files. What happens when you run the code?
+
+```{r}
+#read_csv("a,b\n1,2,3\n4,5,6") - only two columns are specified in the header "a" and "b", but the rows have three columns, the last column is dropped
+
+#read_csv("a,b,c\n1,2\n1,2,3,4") - the numbers of columns in the data do not match the number of columns in the header - three
+
+#In row one, there are only two values, so column c is set to missing. In row two, there is an extra value, and that value is dropped
+
+#read_csv("a,b\n\"1") - the opening quote `"1` is dropped because it is not closed, and a is treated as an integer
+
+#read_csv("a,b\n1,2\na,b") - both "a" and "b" are treated as character vectors since they contain non-numeric strings. This may have been intentional, or the author may have intended the values of the columns to be "1,2" and "a,b"
+
+#read_csv("a;b\n1;3") - the values are separated by ";" rather than ",". Use read_csv2() instead - read_csv2("a;b\n1;3")
+```
+
+
+##Week 5 - Exercise 11.3.5
+
+####What are the most important arguments to locale()?
+
+```{r}
+#date and time formats - date_names, date_format, and time_format time zone - tz numbers - decimal_mark, grouping_mark
+```
+
+####What happens if you try and set decimal_mark and grouping_mark to the same character? 
+####What happens to the default value of grouping_mark when you set decimal_mark to “,”? 
+####What happens to the default value of decimal_mark when you set the grouping_mark to “.”?
+
+```{r}
+#If the decimal and grouping marks are set to the same character, locale throws an error - locale(decimal_mark = ".", grouping_mark = ".")
+
+#If the decimal_mark is set to the comma "`,"`, then the grouping mark is set to the period `"."` - locale(decimal_mark = ",")
+
+#If the grouping mark is set to a period, then the decimal mark is set to a comma locale(grouping_mark = ",")
+```
+
+####Discuss the date_format and time_format options to locale(). What do they do? Construct an example that shows 
+when they might be useful.
+
+```{r}
+#They provide default date and time formats. The [readrvignette](https://cran.r-project.org/web/packages/readr/vignettes/locales.html) discusses using these to parse dates: since dates can include languages specific weekday and month names, and different conventions for specifying AM/PM - locale()
+
+#Examples from the **readr** vignette of parsing French dates - 
+##parse_date("1 janvier 2015", "%d %B %Y", locale = locale("fr"))
+##parse_date("14 oct. 1979", "%d %b %Y", locale = locale("fr"))
+
+#Apparently the time format is not used for anything, but the date format is used for guessing column types
+```
+
+####If you live outside the US, create a new locale object that encapsulates the settings for the types of file 
+you read most commonly
+
+```{r}
+#Example, in Australia - date format is "(d)d/mm/yyyy", meaning that December 1, 2018 is written as `01/12/2018`
+
+#However, default locale will parse that date as January 12, 2018 - parse_date("01/12/2018")
+
+#To correctly parse Australian dates, define a new locale object - au_locale <- locale(date_format = "%d/%m/%Y")
+
+#Using parse_date() with the au_locale as its locale will correctly parse our example date - parse_date("01/12/2018", locale = au_locale)
+```
+
+####What’s the difference between read_csv() and read_csv2()?
+
+```{r}
+#The delimiter. The function read_csv() uses a comma, while read_csv2() uses a semi-colon (`;`). Using a semi-colon is useful when commas are used as a decimal point in Europe.
+```
+
+####What are the most common encodings used in Europe? What are the most common encodings used in Asia? Do some googling to find out.
+
+```{r}
+#UTF-8 is standard now and ASCII has been around for a long time.
+
+#For European languages, there are separate encodings for Roman and Eastern European languages using Latin script, Cyrillic, Greek, Hebrew, Turkish: usually with separate ISO and Windows encoding standards.
+
+#For Asian languages, Arabic and Vietnamese have ISO and Windows standards. The other major Asian scripts have their own:
+  
+#Japanese: JIS X 0208, Shift JIS, ISO-2022-JP
+#Chinese: GB 2312, GBK, GB 18030
+#Korean: KS X 1001, EUC-KR, ISO-2022-KR
+
+#The list in the documentation for stringi::stri_enc_detect() is a good list of encodings since it supports the most common encodings.
+
+##Western European Latin script languages: ISO-8859-1, Windows-1250 (also CP-1250 for code-point)
+##Eastern European Latin script languages: ISO-8859-2, Windows-1252
+##Greek: ISO-8859-7
+##Turkish: ISO-8859-9, Windows-1254
+##Hebrew: ISO-8859-8, IBM424, Windows 1255
+##Russian: Windows 1251
+##Japanese: Shift JIS, ISO-2022-JP, EUC-JP
+##Korean: ISO-2022-KR, EUC-KR
+##Chinese: GB18030, ISO-2022-CN (Simplified), Big5 (Traditional)
+##Arabic: ISO-8859-6, IBM420, Windows 1256
+```
+
+####Generate the correct format string to parse each of the following dates and times
+
+```{r}
+#parse_date(d1, "%B %d, %Y")
+#parse_date(d2, "%Y-%b-%d")
+#parse_date(d3, "%d-%b-%Y")
+#parse_date(d4, "%B %d (%Y)")
+#parse_date(d5, "%m/%d/%y")
+#parse_time(t1, "%H%M")
+#parse_time(t2, "%H:%M:%OS %p")
+```
+
+##Week 6 - Exercise 8.7
+
+####Combine the data into a single dataframe. Complete all the following exercises from the dataframe.
+
+```{r}
+Pirates <- data.frame(name = c("Astrid", "Lea", "Sarina", "Remon", "Lea",
+"Babice", "Jonas", "Wendy", "Niveditha", "Gioia"), sex = c("female", "male", "male", "male", "female", "male", "female", "female", "male", "female"), age = c(30, 25, 25, 29, 31, 30, 33, 35, 25, 34), superhero = c("Batman", "Superman", "Batman", "Spiderman", "Batman", "Antman", "Batman", "Superman", "Maggott", "Superman"),tattoos = c(11, 15, 12, 12, 17, 12, 9, 13, 9, 9))
+```
+
+####What is the median age of the 10 pirates?
+
+```{r}
+median(Pirates$age)
+```
+
+####What was the mean age of female and male pirates separately?
+
+```{r}
+mean(Pirates$age[Pirates$sex == "female"])
+mean(Pirates$age[Pirates$sex == "male"])
+```
+
+####What was the most number of tattoos owned by a male pirate?
+
+```{r}
+max(Pirates$tattoos[Pirates$sex == "male"])
+```
+
+####What percent of pirates under the age of 32 were female?
+
+```{r}
+mean(Pirates$age[Pirates$sex == "female"] < 32)
+```
+
+####What percent of female pirates are under the age of 32?
+
+```{r}
+mean(Pirates$sex[Pirates$age < 32] == "female")
+```
+
+####Add a new column to the dataframe called tattoos.per.year which shows how many tattoos each pirate has for each year in their life
+
+```{r}
+Pirates$tattoos.per.year <- with(Pirates, tattoos / age)
+```
+
+####Which pirate had the most number of tattoos per year?
+
+```{r}
+Pirates$name[Pirates$tattoos.per.year == max(Pirates$tattoos.per.year)]
+```
+
+####What are the names of the female pirates whose favorite superhero is Superman?
+
+```{r}
+Pirates$name[Pirates$sex == "female" & Pirates$superhero == "Superman"]
+```
+
+####What was the median number of tattoos of pirates over the age of 20 whose favorite superhero is Spiderman?
+
+```{r}
+median(Pirates$tattoos[Pirates$age > 20 & Pirates$superhero == "Spiderman"])
+```
+
+##Week 7 - Exercise 5.2.4
+
+install.packages("dplyr")
+```{r}
+library(dplyr)
+library(nycflights13)
+library(tidyverse)
+flights
+View(flights)
+```
+
+####Find all flights that:
+
+####Had an arrival delay of two or more hours
+####Flew to Houston (IAH or HOU)
+####Were operated by United, American, or Delta
+####Departed in summer (July, August, and September)
+####Arrived more than two hours late, but didn’t leave late
+####Were delayed by at least an hour, but made up over 30 minutes in flight
+####Departed between midnight and 6am (inclusive)
+
+```{r}
+#arrival delay of 120 minutes or more
+filter(flights, arr_delay >= 120)
+
+#flights flew to IAH or HOU
+filter(flights, dest %in% c("IAH", "HOU"))
+
+#operated by United, American, or Delta
+filter(flights, carrier %in% c("AA", "DL", "UA"))
+
+#flights departing in summer (July(07), August(08) and September(09))
+filter(flights, month >= 7, month <= 9)
+
+#arrived more than 120 minutes late, but didn’t leave late
+filter(flights, arr_delay > 120, dep_delay <= 0)
+
+#delayed by at least 60 minutes, but made up over 30 minutes in flight
+filter(flights, dep_delay >= 60, dep_delay - arr_delay > 30)
+
+#departed between midnight and 6am (inclusive)
+filter(flights, dep_time <= 600 | dep_time == 2400)
+```
+
+###Another useful dplyr filtering helper is between(). What does it do? Can you use it to simplify the code needed to answer the previous challenges?
+
+```{r}
+#The expression between(x, left, right) is equivalent to x >= left & x <= right.
+
+#We could simplify one of previous code - departing in summer - (month >= 7 & month <= 9) by using the between() function.
+
+filter(flights, between(month, 7, 9))
+```
+
+####How many flights have a missing dep_time? What other variables are missing? What might these rows represent?
+
+```{r}
+filter(flights, is.na(dep_time))
+
+#arrival time (arr_time) is missing for these rows
+```
+
+####Why is NA ^ 0 not missing? Why is NA | TRUE not missing? Why is FALSE & NA not missing? Can you figure out the general rule? (NA * 0 is a tricky counterexample!)
+
+```{r}
+#NA ^ 0 == 1 as all numeric values $x ^ 0 = 1$. NA | TRUE is TRUE because the value of missing TRUE or FALSE, $x$ or `TRUE` is `TRUE` for all values of $x$. Because the value of missing element matters in NA | FALSE and NA & TRUE, they are missing.
+
+#Since $x * 0 = 0$ for all finite, numeric $x$, we might expect `NA * 0 == 0`, but it is not so.
+```
+
+##Week 7 - Exercise 5.3.1
+
+####How could you use arrange() to sort all missing values to the start? (Hint: use is.na()).
+
+```{r}
+#arrange() function puts NA values last
+arrange(flights, dep_time) %>%
+  tail()
+
+#sorting departure time in ascending order with all missing values to the start, we will use is.na())
+arrange(flights, desc(is.na(dep_time)), dep_time)
+```
+
+####Sort flights to find the most delayed flights. Find the flights that left earliest.
+
+```{r}
+#most delayed flights
+arrange(flights, desc(dep_delay))
+
+#flights leaving earliest
+arrange(flights, dep_delay)
+```
+
+####Sort flights to find the fastest flights.
+
+```{r}
+#shortest airtime
+arrange(flights, air_time)
+```
+
+####Which flights travelled the longest? Which travelled the shortest
+
+```{r}
+#flights travelled longest (in terms of distance)
+arrange(flights, desc(distance))
+
+#flights travelled shortest (in terms of distance)
+arrange(flights, distance)
+```
+
+##Week 7 - Exercise 5.4.1
+
+####Brainstorm as many ways as possible to select dep_time, dep_delay, arr_time, and arr_delay from flights.
+
+```{r}
+select(flights, "dep_time", "dep_delay", "arr_time", "arr_delay")
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+select(flights, 4, 6, 7, 9)
+```
+
+####What happens if you include the name of a variable multiple times in a select() call?
+
+```{r}
+#select() function ignores if a variable - year is included multiple times
+select(flights, year, month, day, year, year)
+```
+
+####What does the one_of() function do? Why might it be helpful in conjunction with this vector? vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+
+```{r}
+#The one_of() function selects variables with a character vector rather than unquoted variable name arguments. The function is also useful because it is easier to generate vectors with variable names than to generate unquoted variable names.
+
+vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+select(flights, one_of(vars))
+```
+
+####Does the result of running the following code surprise you? How do the select helpers deal with case by default? How can you change that default? select(flights, contains("TIME"))
+
+```{r}
+#default behavior for `contains()` is to ignore case of the variable name. To change the behavior, we can use ignore.case = FALSE
+select(flights, contains("TIME", ignore.case = FALSE))
+```
+
+##Week 7 - Exercise 5.5.2
+
+####Currently dep_time and sched_dep_time are convenient to look at, but hard to compute with because they’re not really continuous numbers. Convert them to a more convenient representation of number of minutes since midnight.
+
+```{r}
+
+#convert departure times in the number of minutes by dividing dep_time by 100 to get the hours since midnight and multiply by 60 and add the remainder of dep_time divided by 100.
+time2mins <- function(x) {
+  (x %/% 100 * 60 + x %% 100) %% 1440
+}
+flights_times <- mutate(flights,
+  dep_time_mins = time2mins(dep_time),
+  sched_dep_time_mins = time2mins(sched_dep_time)
+)
+```
+
+####Compare air_time with arr_time - dep_time. What do you expect to see? What do you see? What do you need to do to fix it?
+
+```{r}
+flights %>% transmute(air_time, new_diff = arr_time - dep_time)
+#we will convert arrival and departture time to minutes
+flights %>% mutate(arr_time = (arr_time %/% 100)*60 + (arr_time %% 100),
+                   dep_time = (dep_time %/% 100)*60 + (dep_time %% 100) ) %>%
+    transmute(air_time, new_diff = arr_time - dep_time)
+```
+
+####Compare dep_time, sched_dep_time, and dep_delay. How would you expect those three numbers to be related?
+
+```{r}
+#dep_time should equal sum of sched_dep_time and dep_delay
+flights %>% rowwise() %>%
+    transmute(dep_time, sum_dep = sum(sched_dep_time, dep_delay, na.rm = T))
+```
+
+####Find the 10 most delayed flights using a ranking function. How do you want to handle ties? Carefully read the documentation for min_rank().
+
+```{r}
+flights %>% arrange(-dep_delay) %>%
+    slice(1:10)
+```
+
+####What does 1:3 + 1:10 return? Why?
+
+```{r}
+#we get a warning after executing the code. R will attempt to generate the shorter of the two lists until all of the values in the longer list have been evaluated. If the shorter list is not a multiple of the longer, a warning will be raised
+1:3 + 1:10
+```
+
+####What trigonometric functions does R provide?
+
+```{r}
+help("Trig")
+#cosine (`cos()`), sine (`sin()`), tangent (`tan()`) are some of the trigonometric functions
+```
+
+##Week 7 - Exercise 5.6.7
+
+####Brainstorm at least 5 different ways to assess the typical delay characteristics of a group of flights. Consider the following scenarios:
+
+######A flight is 15 minutes early 50% of the time, and 15 minutes late 50% of the time.
+
+```{r}
+delay_char <-
+  flights %>%
+  group_by(flight) %>%
+  summarise(n = n(),
+            fifteen_early = mean(arr_delay == -15, na.rm = T),
+            fifteen_late = mean(arr_delay == 15, na.rm = T),
+            ten_always = mean(arr_delay == 10, na.rm = T),
+            thirty_early = mean(arr_delay == -30, na.rm = T),
+            thirty_late = mean(arr_delay == 30, na.rm = T),
+            percentage_on_time = mean(arr_delay == 0, na.rm = T),
+            twohours = mean(arr_delay > 120, na.rm = T)) %>%
+  map_if(is_double, round, 2) %>%
+  as_tibble()
+delay_char %>%
+  filter(fifteen_early == 0.5, fifteen_late == 0.5)
+```
+
+######A flight is always 10 minutes late.
+
+```{r}
+delay_char %>%
+  filter(ten_always == 1)
+```
+
+######A flight is 30 minutes early 50% of the time, and 30 minutes late 50% of the time.
+
+```{r}
+delay_char %>%
+  filter(thirty_early == 0.5 & thirty_late == 0.5)
+```
+
+######99% of the time a flight is on time. 1% of the time it’s 2 hours late.
+
+```{r}
+delay_char %>%
+  filter(percentage_on_time == 0.99 & twohours == 0.01)
+```
+
+######Which is more important: arrival delay or departure delay?
+
+```{r}
+#arrival delay
+```
+
+####Come up with another approach that will give you the same output as not_cancelled %>% count(dest) and not_cancelled %>% count(tailnum, wt = distance) (without using count()).
+
+```{r}
+
+```
+
+####Our definition of cancelled flights (is.na(dep_delay) | is.na(arr_delay) ) is slightly suboptimal. Why? Which is the most important column?
+
+```{r}
+flights %>%
+    select(dep_delay, arr_delay, air_time) %>%
+    map(~ sum(is.na(.)))
+#arr_delay and air_time variables give us similar results
+```
+
+####Look at the number of cancelled flights per day. Is there a pattern? Is the proportion of cancelled flights related to the average delay?
+
+```{r}
+flights %>%
+  group_by(day) %>%
+  summarise(cancelled = mean(is.na(dep_delay)),
+            mean_dep = mean(dep_delay, na.rm = T),
+            mean_arr = mean(arr_delay, na.rm = T)) %>%
+  ggplot(aes(y = cancelled)) +
+  geom_point(aes(x = mean_dep), colour = "red") +
+  geom_point(aes(x = mean_arr), colour = "blue") +
+  labs(x = "Average delay per day", y = "Cancelled flights per day")
+
+#There is a positive relationship between average delay per day and cancelled flights per day.
+```
+
+####Which carrier has the worst delays? Challenge: can you disentangle the effects of bad airports vs. bad carriers? Why/why not? (Hint: think about flights %>% group_by(carrier, dest) %>% summarise(n()))
+
+```{r}
+flights %>%
+  group_by(carrier) %>%
+  summarise(dep_max = max(dep_delay, na.rm = T),
+            arr_max = max(arr_delay, na.rm = T)) %>%
+  arrange(desc(dep_max, arr_max)) %>%
+  filter(1:n() == 1)
+```
+
+####What does the sort argument to count() do. When might you use it?
+
+```{r}
+flights %>%
+  count(flight, sort = T)
+
+#it sorts the cases based on count
+```
+
+
+##Week 7 - Exercise 5.7.1
+
+####Refer back to the table of useful mutate and filtering functions. Describe how each operation changes when you combine it with grouping.
+
+```{r}
+#mutate() function will add a new column with the group-wise value, so the new column will have the same length of the dataframe with repeated values corresponding to the groups.
+
+flights %>% group_by(flight) %>% mutate(avg_dep_delay = mean(dep_delay))
+
+#filter() function will filter each group individually, similar to tapply() where a dataframe is split into pieces, an operation is performed on each piece and dataframe is reconsituted.
+```
+
+####Which plane (tailnum) has the worst on-time record?
+
+```{r}
+flights %>%
+  filter(!is.na(arr_delay)) %>%
+  group_by(tailnum) %>%
+  summarise(prop_time = sum(arr_delay <= 30)/n(),
+            mean_arr = mean(arr_delay, na.rm = T),
+            fl = n()) %>%
+  arrange(desc(prop_time))
+```
+
+####What time of day should you fly if you want to avoid delays as much as possible?
+
+```{r}
+flights %>%
+  group_by(hour) %>%
+  filter(!is.na(dep_delay)) %>%
+  summarise( delay = mean( dep_delay > 0 , na.rm = T)) %>%
+  ggplot(aes(hour, delay, fill = delay)) + geom_col()
+
+#early evenings is the worst time to fly
+```
+
+####For each destination, compute the total minutes of delay. For each flight, compute the proportion of the total delay for its destination.
+
+```{r}
+flights %>%
+  group_by(dest) %>%
+  filter(!is.na(dep_delay)) %>%
+  summarise(tot_mins = sum(dep_delay[dep_delay > 0]))
+flights %>%
+  filter(!is.na(dep_delay)) %>%
+  group_by(tailnum, dest) %>%
+  summarise(m = mean(dep_delay > 0), n = n()) %>%
+  arrange(desc(m))
+```
+
+####Delays are typically temporally correlated: even once the problem that caused the initial delay has been resolved, later flights are delayed to allow earlier flights to leave. Using lag() explore how the delay of a flight is related to the delay of the immediately preceding flight.
+
+```{r}
+flights %>%
+  select(year, month, day, hour, dest, dep_delay) %>%
+  group_by(dest) %>%
+  mutate(lag_delay = lag(dep_delay)) %>%
+  arrange(dest) %>%
+  filter(!is.na(lag_delay)) %>%
+  summarize(cor = cor(dep_delay, lag_delay, use = "complete.obs"),
+            n = n()) %>%
+  arrange(desc(cor)) %>%
+  filter(row_number(desc(cor)) %in% 1:10)
+```
+
+####Look at each destination. Can you find flights that are suspiciously fast? (i.e. flights that represent a potential data entry error). Compute the air time a flight relative to the shortest flight to that destination. Which flights were most delayed in the air?
+
+```{r}
+#airtime
+flights %>%
+  group_by(dest) %>%
+  arrange(air_time) %>%
+  slice(1:5) %>%
+  select(tailnum, sched_dep_time, sched_arr_time, air_time) %>%
+  arrange(air_time)
+
+#delayed flights
+flights %>%
+  group_by(dest) %>%
+  mutate(shortest = air_time - min(air_time, na.rm = T)) %>%
+  top_n(1, air_time) %>%
+  arrange(-air_time) %>%
+  select(tailnum, sched_dep_time, sched_arr_time, shortest)
+```
+
+####Find all destinations that are flown by at least two carriers. Use that information to rank the carriers.
+
+```{r}
+flights %>%
+  group_by(dest) %>%
+  filter(n_distinct(carrier) > 2) %>%
+  group_by(carrier) %>%
+  summarise(n = n_distinct(dest)) %>%
+  arrange(-n)
+```
+
+####For each plane, count the number of flights before the first delay of greater than 1 hour.
+
+```{r}
+flights %>%
+  arrange(tailnum, year, month, day) %>%
+  group_by(tailnum) %>%
+  mutate(delay_gt1hr = dep_delay > 60) %>%
+  mutate(before_delay = cumsum(delay_gt1hr)) %>%
+  filter(before_delay < 1) %>%
+  count(sort = TRUE)
+```
+
+
+##Week 12 - Cluster Analysis
+```{r}
+library(cluster)
+library(factoextra)
+data(USArrests)
+```
+
+```{r}
+df <- USArrests
+df <- na.omit(df)
+df <- scale(df)
+head(df)
+
+#get_dist() function is used to compute a distance matrix between the rows of a data matrix. The default distance computed is Euclidean and fviz_dist is used to visualize a distance matrix
+distance <- get_dist(df)
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+
+#we calculate k-means by grouping data into two clusters (centers = 2). K-means with nstart = 25 will generate 25 initial configurations
+k2 <- kmeans(df, centers = 2, nstart = 25)
+str(k2)
+
+#groupings resulted in 2 cluster sizes of 30 and 20 across 4 variables (Murder, Assault, UrbanPop, Rape) and cluster assignments
+k2
+
+#fviz_cluster provides an illustration of clusters
+fviz_cluster(k2, data = df)
+
+#determining optimal clusters
+##Elbow method suggesting 4 optimal clusters
+set.seed(123)
+fviz_nbclust(df, kmeans, method = "wss")
+
+##Average Silhouette method suggesting 2 clusters maximize the average silhouette values
+fviz_nbclust(df, kmeans, method = "silhouette")
+
+##Gap Statistic method usggesting 4 optimal clusters
+gap_stat <- clusGap(df, FUN = kmeans, nstart = 25,
+                    K.max = 10, B = 50)
+fviz_gap_stat(gap_stat)
+
+##final result
+final <- kmeans(df, 4, nstart = 25)
+final
+fviz_cluster(final, data = df)
+
+##extracting clusters and adding to our initial data
+USArrests %>%
+  mutate(Cluster = final$cluster) %>%
+  group_by(Cluster) %>%
+  summarise_all("mean")
+```
+
+
+
+
