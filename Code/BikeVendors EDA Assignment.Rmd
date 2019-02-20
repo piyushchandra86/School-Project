@@ -1,0 +1,100 @@
+---
+title: "BikeVendors EDA Assignment"
+author: "Piyush Chandra"
+date: "2/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Introduction
+The information contained in the bikevendor dataset is for bikes sold in the US states by different vendors. The columns represent model of the bike, category 1 and category 2 of each bike, construction material of frame of the bike, price of bikes and state vendors.
+
+ - Dataset name: BikeVendors.csv
+ - Source: Moodle Course Page
+ - Number of rows and observations: 97 rows and 35 columns
+
+##Purpose of this project - Exploratory Data Analysis
+
+##Setting my working directory
+setwd("~/Desktop/Laptop/Harrisburg/Data Analytics/ANLY - 506 - Exploratory Analysis/Final Project-506-51/Projects/Data/")
+
+##Reading data file
+bikevendors = read.csv("BikeVendors.csv")
+
+##Data description
+
+###reading data structure, attributes, summary statistics and top and bottom values
+str(bikevendors)
+attributes(bikevendors)
+summary(bikevendors)
+head(bikevendors)
+tail(bikevendors)
+
+
+###identifying missing values
+sum(is.na(bikevendors$model))
+sum(is.na(bikevendors$category1))
+sum(is.na(bikevendors$category2))
+sum(is.na(bikevendors$frame))
+sum(is.na(bikevendors$price))
+
+
+##Exploratory Data Analysis
+
+###Mean price of bikes
+meanprice = mean(bikevendors$price)
+meanprice
+
+###Median price of bikes
+medianprice = median(bikevendors$price)
+medianprice
+
+
+###Standard deviation of price of bikes
+Stdev = sd(bikevendors$price)
+Stdev
+###As we have a small sample size of bike prices (only 97 observations), there is large deviation from the mean prices indicated by high standard deviation
+
+###share of road and mountain bikes (category1)
+library(plyr)
+count_category1 = count(bikevendors$category1, vars = NULL)
+count_category1
+
+###breakup of category2 bikes
+count_category2 = count(bikevendors$category2, vars = NULL)
+count_category2
+
+
+###identifying highest selling model in each state
+max(bikevendors$Albuquerque.Cycles, na.rm = T, which.max(bikevendors$Albuquerque.Cycles))
+max(bikevendors$Ann.Arbor.Speed, na.rm = T, which.max(bikevendors$Ann.Arbor.Speed))
+max(bikevendors$Austin.Cruisers, na.rm = T, which.max(bikevendors$Austin.Cruisers))
+max(bikevendors$Cincinnati.Speed, na.rm = T, which.max(bikevendors$Cincinnati.Speed))
+max(bikevendors$Columbus.Race.Equipment, na.rm = T, which.max(bikevendors$Columbus.Race.Equipment))
+max(bikevendors$Dallas.Cycles, na.rm = T, which.max(bikevendors$Dallas.Cycles))
+max(bikevendors$Denver.Bike.Shop, na.rm = T, which.max(bikevendors$Denver.Bike.Shop))
+max(bikevendors$Detroit.Cycles, na.rm = T, which.max(bikevendors$Detroit.Cycles))
+max(bikevendors$Indianapolis.Velocipedes, na.rm = T, which.max(bikevendors$Indianapolis.Velocipedes))
+max(bikevendors$Ithaca.Mountain.Climbers, na.rm = T, which.max(bikevendors$Ithaca.Mountain.Climbers))
+max(bikevendors$Kansas.City.29ers, na.rm = T, which.max(bikevendors$Kansas.City.29ers))
+max(bikevendors$Las.Vegas.Cycles, na.rm = T, which.max(bikevendors$Las.Vegas.Cycles))
+max(bikevendors$Los.Angeles.Cycles, na.rm = T, which.max(bikevendors$Los.Angeles.Cycles))
+max(bikevendors$Louisville.Race.Equipment, na.rm = T, which.max(bikevendors$Louisville.Race.Equipment))
+max(bikevendors$Miami.Race.Equipment, na.rm = T, which.max(bikevendors$Miami.Race.Equipment))
+max(bikevendors$Minneapolis.Bike.Shop, na.rm = T, which.max(bikevendors$Minneapolis.Bike.Shop))
+max(bikevendors$Nashville.Cruisers, na.rm = T, which.max(bikevendors$Nashville.Cruisers))
+max(bikevendors$New.Orleans.Velocipedes, na.rm = T, which.max(bikevendors$New.Orleans.Velocipedes))
+max(bikevendors$New.York.Cycles, na.rm = T, which.max(bikevendors$New.York.Cycles))
+max(bikevendors$Oklahoma.City.Race.Equipment, na.rm = T, which.max(bikevendors$Oklahoma.City.Race.Equipment))
+max(bikevendors$Philadelphia.Bike.Shop, na.rm = T, which.max(bikevendors$Philadelphia.Bike.Shop))
+max(bikevendors$Phoenix.Bi.peds, na.rm = T, which.max(bikevendors$Phoenix.Bi.peds))
+max(bikevendors$Pittsburgh.Mountain.Machines, na.rm = T, which.max(bikevendors$Pittsburgh.Mountain.Machines))
+max(bikevendors$Portland.Bi.peds, na.rm = T, which.max(bikevendors$Portland.Bi.peds))
+max(bikevendors$Providence.Bi.peds, na.rm = T, which.max(bikevendors$Providence.Bi.peds))
+max(bikevendors$San.Antonio.Bike.Shop, na.rm = T, which.max(bikevendors$San.Antonio.Bike.Shop))
+max(bikevendors$San.Francisco.Cruisers, na.rm = T, which.max(bikevendors$San.Francisco.Cruisers))
+max(bikevendors$Seattle.Race.Equipment, na.rm = T, which.max(bikevendors$Seattle.Race.Equipment))
+max(bikevendors$Tampa.29ers, na.rm = T, which.max(bikevendors$Tampa.29ers))
+max(bikevendors$Wichita.Speed, na.rm = T, which.max(bikevendors$Wichita.Speed))
