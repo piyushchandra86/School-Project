@@ -1,11 +1,10 @@
 # Projects
 
 ## Introduction
-The information contained in the gapminder dataset is for countries around the world. The columns represent name of the country, year (from 1800 to 2015), life expectancy in years, population, per capita income and region of that country.
+ The information contained in the bikevendor dataset is for bikes sold in the US states by different vendors. The columns represent model of the bike, category 1 and category 2 of each bike, construction material of frame of the bike, price of bikes and state vendors.
 
- - Dataset name: gapminder
- - Source: https://raw.githubusercontent.com/birdsarah/pydata-nc/master/tutorial/assets/gapminder.csv
- - Number of rows and observations: 41284 rows and 6 columns
+ - Dataset name: BikeVendors.csv
+ - Source: Moodle Course Page
+ - Number of rows and observations: 97 rows and 35 columns
 
-### Purpose
-We will analyse the data as a part of this assignment
+## Purpose of this project - Exploratory Data Analysis
